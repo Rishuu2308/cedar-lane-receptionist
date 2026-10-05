@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cedar Lane Auto Detailing - receptionist chat</title>
+<style>
+  body { font: 15px/1.45 system-ui, sans-serif; margin: 0; background: #f4f4f2; color: #1b1b1b; }
+  main { max-width: 720px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
+  header { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 18px; margin: 0; }
+  #status { font-size: 12px; color: #666; flex: 1; }
+  #log { flex: 1; overflow-y: auto; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 12px 0; }
+  .msg { margin: 8px 0; max-width: 85%; padding: 8px 12px; border-radius: 12px; white-space: pre-wrap; }
+  .caller { background: #1f6feb; color: #fff; margin-left: auto; }
+  .agent { background: #eceae6; }
+  .error { background: #fde7e7; color: #8a1c1c; }
+  details { font-size: 12px; color: #555; margin: 2px 0 8px; }
+  details pre { background: #f7f7f7; padding: 8px; border-radius: 6px; overflow-x: auto; }
+  form { display: flex; gap: 8px; }
+  input[type=text] { flex: 1; padding: 10px; border: 1px solid #bbb; border-radius: 8px; font: inherit; }
+  button { padding: 10px 14px; border: 0; border-radius: 8px; background: #1b1b1b; color: #fff; font: inherit; cursor: pointer; }
+  button.secondary { background: #777; }
+  button:disabled { opacity: .5; cursor: default; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Cedar Lane Auto Detailing</h1>
+    <span id="status">connecting...</span>
+    <button class="secondary" id="end" type="button">End call / new call</button>
+  </header>
+  <div id="log"></div>
+  <form id="form">
+    <input type="text" id="input" placeholder="Type what the caller says..." autocomplete="off" autofocus />
+    <button id="send">Send</button>
+  </form>
+</main>
+<script>
+  const log = document.getElementById('log');
+  const input = document.getElementById('input');
+  const send = document.getElementById('send');
+  const newId = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
+  let sessionId = newId();
+
+  function add(cls, text) {
+    const el = document.createElement('div');
+    el.className = 'msg ' + cls;
+    el.textContent = text;
+    log.appendChild(el);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function addTrace(trace) {
+    if (!trace || !trace.length) return;
+    const d = document.createElement('details');
+    const s = document.createElement('summary');
+    s.textContent = 'tools: ' + trace.map(t => t.name + (t.result.ok ? '' : ' (refused)') + ' ' + t.ms + 'ms').join(', ');
+    const pre = document.createElement('pre');
+    pre.textContent = JSON.stringify(trace, null, 2);
+    d.append(s, pre);
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function greet() {
+    add('agent', 'Cedar Lane Auto Detailing, this is Riley. How can I help?');
+  }
+
+  document.getElementById('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const message = input.value.trim();
+    if (!message) return;
+    input.value = '';
+    add('caller', message);
+    send.disabled = true;
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, message }),
+      });
+      const data = await res.json();
+      if (!res.ok) add('error', (data.error || 'Request failed') + (data.detail ? '\n' + data.detail : ''));
+      else { addTrace(data.trace); add('agent', data.reply); }
+    } catch (err) {
+      add('error', 'Could not reach the server: ' + err.message);
+    } finally {
+      send.disabled = false;
+      input.focus();
+    }
+  });
+
+  document.getElementById('end').addEventListener('click', async () => {
+    const old = sessionId;
+    sessionId = newId();
+    log.textContent = '';
+    greet();
+    await fetch('/api/end', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: old }) }).catch(() => {});
+  });
+
+  // Finalise the call log if the tab is closed.
+  window.addEventListener('pagehide', () => {
+    navigator.sendBeacon('/api/end', new Blob([JSON.stringify({ sessionId })], { type: 'application/json' }));
+  });
+
+  fetch('/api/health').then(r => r.json()).then(h => {
+    document.getElementById('status').textContent =
+      h.shopTime + ' | store: ' + h.store + ' | model: ' + (h.chatModel || 'not configured');
+  }).catch(() => { document.getElementById('status').textContent = 'server unreachable'; });
+
+  greet();
+</script>
+</body>
+</html>

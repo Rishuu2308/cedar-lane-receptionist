@@ -1,0 +1,38 @@
+{
+  "name": "cedar-lane-receptionist",
+  "version": "1.0.0",
+  "description": "AI receptionist for Cedar Lane Auto Detailing: text chat (Phase 1) and Vapi voice (Phase 2), backed by Google Calendar and Google Sheets.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "eval": "tsx evals/run.ts",
+    "seed": "tsx scripts/seed.ts",
+    "check:google": "tsx scripts/check-google.ts",
+    "vapi:sync": "tsx scripts/vapi-sync.ts",
+    "vapi:print": "tsx scripts/vapi-sync.ts --print"
+  },
+  "dependencies": {
+    "@googleapis/calendar": "^20.1.0",
+    "@googleapis/sheets": "^18.1.0",
+    "dotenv": "^18.0.5",
+    "express": "^5.2.1",
+    "luxon": "^3.7.2",
+    "openai": "^7.28.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/luxon": "^3.7.6",
+    "@types/node": "^26.6.4",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
+}

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+# Google service-account keys must never be committed
+service-account*.json
+credentials*.json
+.DS_Store
