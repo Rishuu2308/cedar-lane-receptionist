@@ -20,6 +20,8 @@ export const config = {
   openaiApiKey: str('OPENAI_API_KEY'),
   openaiModel: str('OPENAI_MODEL', 'gpt-4.1'),
   openaiBaseUrl: str('OPENAI_BASE_URL') || undefined,
+  /** Minimum gap between model requests in ms (0 = none). For free tiers with low per-minute limits. */
+  llmMinIntervalMs: Math.max(0, int('LLM_MIN_INTERVAL_MS', 0)),
 
   /** Where appointments and contacts live. */
   store: (explicitStore === 'google' || explicitStore === 'memory'

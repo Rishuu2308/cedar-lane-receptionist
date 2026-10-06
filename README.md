@@ -5,7 +5,7 @@ An AI receptionist that answers for a small auto detailing shop. It books, moves
 - **Phase 1** is a text chat agent with a basic web page on top.
 - **Phase 2** puts the same agent on the phone with **Vapi**.
 
-Stack: TypeScript on Node 20+, OpenAI for the model, Express for the server.
+Stack: TypeScript on Node 20+, OpenAI (or any OpenAI-compatible provider, such as Gemini's free tier) for the model, Express for the server.
 
 ## Contents
 
@@ -37,6 +37,25 @@ Is the 3:30 interior detail and wash appointment on Thursday open?
 Sure, 4:30 works.
 Sara, 415-555-0190.
 ```
+
+### Running on Gemini's free tier instead of OpenAI
+
+The model client speaks the OpenAI chat-completions format, so any compatible endpoint works. For Google Gemini, get a key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) and put this in `.env`:
+
+```
+OPENAI_API_KEY=<your Gemini key>
+OPENAI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
+OPENAI_MODEL=gemini-3.8-flash
+LLM_MIN_INTERVAL_MS=6500
+```
+
+Then check it end to end with one conversation before anything else:
+
+```bash
+npm run eval -- --only brief --verbose
+```
+
+`LLM_MIN_INTERVAL_MS` spaces requests out to stay under the free tier's per-minute limit; adjust it to the limit AI Studio shows for your model, or remove it on a paid key. If the provider rejects optional settings (temperature, one-tool-at-a-time, JSON mode), the client retries once with only the required fields and logs a `[llm]` line saying so. Provider data attached to tool calls (Gemini's thought signatures) is sent back unchanged.
 
 ## Google setup
 
@@ -148,7 +167,7 @@ Notes:
 ## Testing
 
 ```bash
-npm test          # 111 unit tests, no network, about 5 seconds
+npm test          # 117 unit tests, no network, about 6 seconds
 npm run typecheck
 npm run eval      # scripted conversations against the real model (needs OPENAI_API_KEY)
 ```
