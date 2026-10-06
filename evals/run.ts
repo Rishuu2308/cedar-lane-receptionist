@@ -10,7 +10,7 @@
  */
 import './env.js';
 import { config } from '../src/config.js';
-import { OpenAiLlm } from '../src/llm.js';
+import { GeminiLlm } from '../src/gemini.js';
 import { runScenario } from './harness.js';
 import { type Outcome, SCENARIOS, type Scenario } from './scenarios.js';
 
@@ -31,13 +31,13 @@ async function main() {
   const repeat = Math.max(1, Number(value('--repeat') ?? 1));
   const verbose = args.includes('--verbose');
 
-  if (!config.openaiApiKey) {
-    console.error('OPENAI_API_KEY is not set. Evals run the real model; add the key to .env.');
+  if (!config.geminiApiKey) {
+    console.error('GEMINI_API_KEY is not set. Evals run the real model; add the key to .env.');
     process.exit(1);
   }
-  const llm = new OpenAiLlm();
+  const llm = new GeminiLlm();
   const selected = SCENARIOS.filter((s) => !only || s.name.toLowerCase().includes(only) || s.area.toLowerCase().includes(only));
-  console.log(`Running ${selected.length} scenario(s) x ${repeat} against ${config.openaiModel}\n`);
+  console.log(`Running ${selected.length} scenario(s) x ${repeat} against ${config.geminiModel}\n`);
 
   let passed = 0;
   let total = 0;

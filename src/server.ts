@@ -29,7 +29,7 @@ export function createServer(app: App): express.Express {
       ok: true,
       shop: SHOP.name,
       store: app.storeMode,
-      chatModel: app.llm ? config.openaiModel : null,
+      chatModel: app.llm ? config.geminiModel : null,
       shopTime: app.clock().toFormat("cccc, LLL d yyyy, h:mm a ('" + SHOP.timezone + "')"),
     });
   });
@@ -44,7 +44,7 @@ export function createServer(app: App): express.Express {
       return;
     }
     if (!app.agent) {
-      res.status(503).json({ error: 'No LLM configured. Set OPENAI_API_KEY in .env and restart.' });
+      res.status(503).json({ error: 'No model configured. Set GEMINI_API_KEY in .env and restart.' });
       return;
     }
     try {

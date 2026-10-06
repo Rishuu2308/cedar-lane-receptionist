@@ -8,7 +8,8 @@ import { config } from './config.js';
 import { GoogleContacts } from './contacts/google.js';
 import { MemoryContacts } from './contacts/memory.js';
 import type { ContactsStore } from './contacts/types.js';
-import { type LlmClient, OpenAiLlm } from './llm.js';
+import { GeminiLlm } from './gemini.js';
+import type { LlmClient } from './llm.js';
 import { Scheduler } from './scheduling.js';
 import { seedContacts, seedEvents } from './seed-data.js';
 import { makeSummarizer } from './summarize.js';
@@ -32,7 +33,7 @@ export interface AppOptions {
   clock?: Clock;
   calendar?: CalendarStore;
   contacts?: ContactsStore;
-  /** Pass null to run without a model. Omit to use OpenAI from the environment. */
+  /** Pass null to run without a model. Omit to use Gemini with the key from the environment. */
   llm?: LlmClient | null;
   idleSummaryMs?: number;
   canTransfer?: boolean;
@@ -56,7 +57,7 @@ export function createApp(opts: AppOptions = {}): App {
 
   let llm: LlmClient | null;
   if (opts.llm !== undefined) llm = opts.llm;
-  else llm = config.openaiApiKey ? new OpenAiLlm() : null;
+  else llm = config.geminiApiKey ? new GeminiLlm() : null;
 
   const scheduler = new Scheduler(calendar, clock);
   const tracker = new CallTracker({

@@ -42,7 +42,7 @@ async function main() {
   } catch (err) {
     console.error(`Could not read the calendar's timezone (${err instanceof Error ? err.message : err}); using ${SHOP.timezone}.`);
   }
-  // Only the tool definitions are needed beyond that, so no OpenAI access is required.
+  // Only the tool definitions are needed beyond that, so no model access is required.
   const app = createApp({ calendar: new MemoryCalendar(), contacts: new MemoryContacts(), llm: null });
   const serverUrl = config.publicUrl || 'https://YOUR-PUBLIC-URL';
   const assistant = buildAssistant({ tools: app.tools, serverUrl, secret: config.vapiWebhookSecret || undefined });

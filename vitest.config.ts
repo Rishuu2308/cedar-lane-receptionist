@@ -9,7 +9,7 @@ export default defineConfig({
       SHOP_TIMEZONE: 'America/Los_Angeles',
       SHOP_BAYS: '1',
       DEFAULT_COUNTRY_CODE: '1',
-      OPENAI_API_KEY: '',
+      GEMINI_API_KEY: '',
       PUBLIC_URL: 'https://receptionist.example.test',
       VAPI_WEBHOOK_SECRET: 'test-secret',
       HUMAN_TRANSFER_NUMBER: '',
